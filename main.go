@@ -90,14 +90,14 @@ func handleProxy(w http.ResponseWriter, r *http.Request) {
 		resp, err := client.Get(target)
 
 		if err != nil {
-			log.Printf("Request to %s failed after %v: %v", target, err)
+			log.Printf("Request to %s failed: %v", target, err)
 			breaker.RecordResult(false)
 			metrics.RecordRequest(target, false)
 			continue
 		}
 
 		if resp.StatusCode >= 500 {
-			log.Printf("Request to %s failed with status code: %d (duration: %v)", target, resp.StatusCode)
+			log.Printf("Request to %s failed with status code: %d", target, resp.StatusCode)
 			breaker.RecordResult(false)
 			metrics.RecordRequest(target, false)
 			resp.Body.Close()
