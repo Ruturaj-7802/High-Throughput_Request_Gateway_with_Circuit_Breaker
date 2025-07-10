@@ -10,6 +10,7 @@ import (
 
 	cb "github.com/ruturaj-7802/gateway/circuitbreaker"
 	"github.com/ruturaj-7802/gateway/config"
+	"github.com/ruturaj-7802/gateway/metrics"
 )
 
 var routeConfig config.Config
@@ -32,11 +33,13 @@ func main() {
 	for _, backends := range routeConfig {
 		for _, backend := range backends {
 			breakers[backend] = cb.NewBreaker(backend)
+			metrics.InitBackend(backend)
 			log.Printf("Initialized circuit breaker for backend: %s", backend)
 		}
 	}
 
 	http.HandleFunc("/v1/proxy/", handleProxy)
+	http.HandleFunc("/metrics", handleMetrics)
 
 	fmt.Println("Gateway running on :8080")
 	log.Fatal(http.ListenAndServe(":8080", nil))
@@ -89,17 +92,20 @@ func handleProxy(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			log.Printf("Request to %s failed after %v: %v", target, err)
 			breaker.RecordResult(false)
+			metrics.RecordRequest(target, false)
 			continue
 		}
 
 		if resp.StatusCode >= 500 {
 			log.Printf("Request to %s failed with status code: %d (duration: %v)", target, resp.StatusCode)
 			breaker.RecordResult(false)
+			metrics.RecordRequest(target, false)
 			resp.Body.Close()
 			continue
 		}
 
 		breaker.RecordResult(true)
+		metrics.RecordRequest(target, true)
 
 		defer resp.Body.Close()
 		// set response status to match backend response
@@ -112,4 +118,11 @@ func handleProxy(w http.ResponseWriter, r *http.Request) {
 
 	log.Printf("All backends failed for service: %s", service)
 	http.Error(w, "All backends unavailable", http.StatusServiceUnavailable)
+}
+
+func handleMetrics(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "text/plain")
+	for backend, stat := range metrics.GetAllStats() {
+		fmt.Println(w, "%s -> total=%d, success=%d, failure=%d\n", backend, stat.TotalRequests, stat.Successes, stat.Failures)
+	}
 }
