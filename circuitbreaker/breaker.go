@@ -1,6 +1,7 @@
 package circuitbreaker
 
 import (
+	"log"
 	"sync"
 	"time"
 )
@@ -13,23 +14,27 @@ const (
 	HalfOpen State = "Half-Open"
 )
 
+const (
+	failureThreshold = 3
+	openTimeout      = 10 * time.Second
+)
+
 type Circuitbreaker struct {
 	mu           sync.Mutex
 	FailureCount int
 	State        State
 	LastFailure  time.Time
+	service      string
 }
 
 // Closed => working fine
 // Open => failed for N consecutive times
 // Half-Open => after Timeout, one request is send to Open circuit, if succeeds, -> Closed, else -> Open and rest Timeout timer
 
-const failureThreshold = 3
-const openTimeout = 10 * time.Second
-
-func NewBreaker() *Circuitbreaker {
+func NewBreaker(service string) *Circuitbreaker {
 	return &Circuitbreaker{
-		State: Closed,
+		State:   Closed,
+		service: service,
 	}
 }
 
@@ -42,8 +47,10 @@ func (cb *Circuitbreaker) AllowRequest() bool {
 	case Open:
 		if time.Since(cb.LastFailure) > openTimeout {
 			cb.State = HalfOpen
+			log.Printf("[CIRCUIT] %s → HALF-OPEN (timeout expired)", cb.service) // 🔥
 			return true
 		}
+		log.Printf("[CIRCUIT] %s → BLOCKED (OPEN)", cb.service) // 🔥
 		return false
 	default:
 		return true
@@ -58,6 +65,7 @@ func (cb *Circuitbreaker) RecordResult(success bool) {
 	if success {
 		cb.FailureCount = 0
 		cb.State = Closed
+		log.Printf("[CIRCUIT] %s → CLOSED (recovered)", cb.service)
 	} else {
 		cb.FailureCount++
 		cb.LastFailure = time.Now()

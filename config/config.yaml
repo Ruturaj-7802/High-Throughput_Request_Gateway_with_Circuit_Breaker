@@ -1,6 +1,4 @@
 # config/config.yaml
-serviceA:
+product:
   - http://localhost:9001
   - http://localhost:9002
-serviceB:
-  - http://localhost:9003
