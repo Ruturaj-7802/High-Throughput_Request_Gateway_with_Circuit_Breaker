@@ -4,13 +4,9 @@
 
 This project implements a **lightweight gateway** in Go that forwards requests to backend services using a **round-robin load balancer** and a **per-backend circuit breaker** to ensure fault isolation.
 
-> This is a **Go implementation** of the assignment originally suggested for Python. The core principles remain intact.
-
----
-
 ## Core Features
 
-### âœ“ REST Proxy API
+### REST Proxy API
 
 - **Endpoint:**
 
@@ -24,7 +20,7 @@ This project implements a **lightweight gateway** in Go that forwards requests t
 
 ### Config-Driven Routing
 
-- Reads service â†’ list of backend URLs from a YAML config file.
+- Reads service list of backend URLs from a YAML config file.
 - Example `config.yaml`:
 
 ```yaml
@@ -50,7 +46,7 @@ Each backend URL is protected by a **circuit breaker**, which:
 |--------------|--------------------------------------------------------------------------|
 | **Closed**   | All requests go through normally. Failures are tracked.                  |
 | **Open**     | Circuit "trips" after `N` consecutive failures. Requests are blocked.    |
-| **Half-Open**| After cooldown, one test request is sent. If successful â†’ Closed. Else â†’ Open. |
+| **Half-Open**| After cooldown, one test request is sent. If successful Closed. Else Open. |
 
 - **Failure Threshold:** 3
 - **Open Timeout:** 10 seconds (for demo purposes)
@@ -74,8 +70,8 @@ go run backend/main.go 9002
 ### 1. Clone & Build
 
 ```bash
-git clone https://github.com/yourusername/request-gateway
-cd request-gateway
+git clone <github-url>
+cd <folder>
 go mod tidy
 ```
 
@@ -116,9 +112,9 @@ curl http://localhost:8080/v1/proxy/product
 - Circuit state transitions are logged:
 
 ```bash
-[CIRCUIT] http://localhost:9002 â†’ OPEN (threshold reached)
-[CIRCUIT] http://localhost:9002 â†’ HALF-OPEN (timeout passed)
-[CIRCUIT] http://localhost:9002 â†’ CLOSED (recovered)
+[CIRCUIT] http://localhost:9002 OPEN (threshold reached)
+[CIRCUIT] http://localhost:9002 HALF-OPEN (timeout passed)
+[CIRCUIT] http://localhost:9002 CLOSED (recovered)
 ```
 
 - Per-backend metrics printed on each request:
@@ -166,10 +162,7 @@ curl http://localhost:8080/v1/proxy/product
 Yes. Kill or block one backend. You'll observe:
 - Circuit moving to `OPEN`
 - Requests skipping it
-- Eventually `HALF-OPEN â†’ CLOSED` if recovered
-
-**Q: Why Go instead of Python?**  
-This implementation explores the same principles (routing, circuit breaking, resilience) in a performant, concurrent language.
+- Eventually `HALF-OPEN -> CLOSED` if recovered
 
 ---
 
