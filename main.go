@@ -39,7 +39,6 @@ func main() {
 	}
 
 	http.HandleFunc("/v1/proxy/", handleProxy)
-	http.HandleFunc("/metrics", handleMetrics)
 
 	fmt.Println("Gateway running on :8080")
 	log.Fatal(http.ListenAndServe(":8080", nil))
@@ -118,11 +117,4 @@ func handleProxy(w http.ResponseWriter, r *http.Request) {
 
 	log.Printf("All backends failed for service: %s", service)
 	http.Error(w, "All backends unavailable", http.StatusServiceUnavailable)
-}
-
-func handleMetrics(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "text/plain")
-	for backend, stat := range metrics.GetAllStats() {
-		fmt.Println(w, "%s -> total=%d, success=%d, failure=%d\n", backend, stat.TotalRequests, stat.Successes, stat.Failures)
-	}
 }
