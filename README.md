@@ -59,8 +59,8 @@ Each backend URL is protected by a **circuit breaker**, which:
 Use a helper server to simulate backend responses:
 
 ```bash
-go run backend/main.go 9001
-go run backend/main.go 9002
+go run main.go 9001
+go run main.go 9002
 ```
 
 ---
@@ -82,8 +82,8 @@ go mod tidy
 In two terminals:
 
 ```bash
-go run backend/main.go 9001
-go run backend/main.go 9002
+go run main.go 9001
+go run main.go 9002
 ```
 
 ---
