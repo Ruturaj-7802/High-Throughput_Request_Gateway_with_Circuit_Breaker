@@ -129,25 +129,6 @@ curl http://localhost:8080/v1/proxy/product
 
 ---
 
-## Project Structure
-
-```
-.
-  backend/             # mock backend server
-    main.go
-
-  circuitbreaker/      # in-memory circuit breaker logic
-    breaker.go
-
-  config/
-    config.yaml        # routing rules
-
-  main.go              # entrypoint gateway
-  README.md            # this file
-```
-
----
-
 ## Design Notes
 
 - **In-Memory Breakers:** Simple per-backend circuit breaker stored using a map.
