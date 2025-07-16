@@ -147,6 +147,12 @@ Yes. Kill or block one backend. You'll observe:
 
 ---
 
+## Benchmarking
+
+<img width="774" height="860" alt="image" src="https://github.com/user-attachments/assets/c1783906-3a58-45ff-a960-24e27d08ed8b" />
+
+
+---
 ## Author
 
 - Ruturaj Patil
